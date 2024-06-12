@@ -14,6 +14,9 @@ const emailPassword = process.env.EMAIL_PASSWORD
 const app = express();
 app.use(cors());
 app.use(express.json());
+console.log(process.env.ENVIRONMENT)
+console.log(emailUser)
+console.log(emailPassword)
 
 const transporter = nodemailer.createTransport({
   host: process.env.ENVIRONMENT === 'local' ? 'sandbox.smtp.mailtrap.io' : '',
