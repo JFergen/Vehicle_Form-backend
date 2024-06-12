@@ -5,7 +5,7 @@ const cors = require('cors');
 
 // Setup email credentials based on environment
 // Local = Mail Trap account (Does not send email)
-// QA = testVehicleFormNoReply@gmail.com
+// QA = testVehicleFormNoReply@gmail.com (TestVehicleFormNoReply1!)
 // Prod - Certified autoplex email?
 
 const emailUser = process.env.EMAIL_USER
@@ -14,9 +14,6 @@ const emailPassword = process.env.EMAIL_PASSWORD
 const app = express();
 app.use(cors());
 app.use(express.json());
-console.log(process.env.ENVIRONMENT)
-console.log(emailUser)
-console.log(emailPassword)
 
 const transporter = nodemailer.createTransport({
   host: process.env.ENVIRONMENT === 'local' ? 'sandbox.smtp.mailtrap.io' : '',
