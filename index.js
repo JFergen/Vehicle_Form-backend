@@ -26,13 +26,17 @@ const transporter = nodemailer.createTransport({
 });
 
 app.post('/send-email', (req, res) => {
-  const { ownerName, carModel, carYear, email } = req.body;
+  const { ownerName, carModel, carYear, vin, licensePlate, email } = req.body;
+
+  // Determine the identifier to use (either VIN or License Plate)
+  const identifier = vin || licensePlate;
+  const identifierLabel = vin ? 'VIN' : 'License Plate';
 
   const mailOptions = {
     from: emailUser,
     to: email,
     subject: 'Car Information',
-    text: `Owner Name: ${ownerName}\nCar Model: ${carModel}\nCar Year: ${carYear}\nVIN/License Plate: ${identifier}\nEmail: ${email}`,
+    text: `Owner Name: ${ownerName}\nCar Model: ${carModel}\nCar Year: ${carYear}\n${identifierLabel}: ${identifier}\nEmail: ${email}`,
   };
 
   transporter.sendMail(mailOptions, (error, info) => {
