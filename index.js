@@ -26,7 +26,7 @@ const transporter = nodemailer.createTransport({
 });
 
 app.post('/send-email', (req, res) => {
-  const { ownerName, carModel, carYear, vin, licensePlate, email } = req.body;
+  const { ownerName, carModel, carYear, vin, licensePlate, email, phoneNumber } = req.body;
 
   // Determine the identifier to use (either VIN or License Plate)
   const identifier = vin || licensePlate;
@@ -36,7 +36,7 @@ app.post('/send-email', (req, res) => {
     from: emailUser,
     to: email,
     subject: `Cash Offer Information - ${ownerName}`,
-    text: `Owner Name: ${ownerName}\nCar Model: ${carModel}\nCar Year: ${carYear}\n${identifierLabel}: ${identifier}\nEmail: ${email}`,
+    text: `Owner Name: ${ownerName}\nCar Model: ${carModel}\nCar Year: ${carYear}\n${identifierLabel}: ${identifier}\nEmail: ${email}\n Phone Number: ${phoneNumber}`,
   };
 
   transporter.sendMail(mailOptions, (error, info) => {
