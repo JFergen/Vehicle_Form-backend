@@ -27,7 +27,6 @@ const transporter = nodemailer.createTransport({
 
 app.post('/send-email', (req, res) => {
   const { ownerName, carModel, carYear, vin, licensePlate, state, email, phoneNumber } = req.body;
-  console.log(req.body)
 
   // Determine the identifier to use (either VIN or License Plate)
   const from = {
