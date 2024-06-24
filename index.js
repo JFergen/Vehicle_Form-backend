@@ -41,7 +41,7 @@ app.post('/send-email', (req, res) => {
 
   const mailOptions = {
     from: from,
-    to: email,
+    to: process.env.EMAIL_TO,
     subject: `Cash Offer Information - ${ownerName}`,
     text: text
   };
