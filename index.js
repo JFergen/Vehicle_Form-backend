@@ -26,21 +26,25 @@ const transporter = nodemailer.createTransport({
 });
 
 app.post('/send-email', (req, res) => {
-  const { ownerName, carModel, carYear, vin, licensePlate, email, phoneNumber } = req.body;
+  const { ownerName, carModel, carYear, vin, licensePlate, state, email, phoneNumber } = req.body;
+  console.log(req.body)
 
   // Determine the identifier to use (either VIN or License Plate)
-  const identifier = vin || licensePlate;
-  const identifierLabel = vin ? 'VIN' : 'License Plate';
   const from = {
     name: 'Cash Offer Customer',
     address: emailUser
   }
+  let text = `Owner Name: ${ownerName}\nVIN: ${vin}`;
+  if (licensePlate) {
+    text += `\nLicense Plate: ${licensePlate}\nState: ${state}`;
+  }
+  text += `\nCar Model: ${carModel}\nCar Year: ${carYear}\nEmail: ${email}\nPhone Number: ${phoneNumber}`;
 
   const mailOptions = {
     from: from,
     to: email,
     subject: `Cash Offer Information - ${ownerName}`,
-    text: `Owner Name: ${ownerName}\nCar Model: ${carModel}\nCar Year: ${carYear}\n${identifierLabel}: ${identifier}\nEmail: ${email}\n Phone Number: ${phoneNumber}`,
+    text: text
   };
 
   transporter.sendMail(mailOptions, (error, info) => {
