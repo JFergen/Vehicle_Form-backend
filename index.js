@@ -31,9 +31,13 @@ app.post('/send-email', (req, res) => {
   // Determine the identifier to use (either VIN or License Plate)
   const identifier = vin || licensePlate;
   const identifierLabel = vin ? 'VIN' : 'License Plate';
+  const from = {
+    name: 'Cash Offer Customer',
+    address: emailUser
+  }
 
   const mailOptions = {
-    from: emailUser,
+    from: from,
     to: email,
     subject: `Cash Offer Information - ${ownerName}`,
     text: `Owner Name: ${ownerName}\nCar Model: ${carModel}\nCar Year: ${carYear}\n${identifierLabel}: ${identifier}\nEmail: ${email}\n Phone Number: ${phoneNumber}`,
