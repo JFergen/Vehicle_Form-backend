@@ -35,7 +35,7 @@ app.post('/send-email', (req, res) => {
   const mailOptions = {
     from: emailUser,
     to: email,
-    subject: 'Car Information',
+    subject: `Cash Offer Information - ${ownerName}`,
     text: `Owner Name: ${ownerName}\nCar Model: ${carModel}\nCar Year: ${carYear}\n${identifierLabel}: ${identifier}\nEmail: ${email}`,
   };
 
