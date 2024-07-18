@@ -2,6 +2,9 @@ require('dotenv').config();
 const express = require('express');
 const nodemailer = require('nodemailer');
 const cors = require('cors');
+const sharp = require('sharp');
+const multer = require('multer');
+const upload = multer(); // Initialize multer
 
 // Setup email credentials based on environment
 // Local = Mail Trap account (Does not send email)
@@ -25,33 +28,54 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-app.post('/send-email', (req, res) => {
-  const { ownerName, carModel, carYear, vin, licensePlate, state, email, phoneNumber } = req.body;
-
-  // Determine the identifier to use (either VIN or License Plate)
-  const from = {
-    name: 'Cash Offer Customer',
-    address: emailUser
-  }
-  let text = `Owner Name: ${ownerName}\nVIN: ${vin}`;
-  if (licensePlate) {
-    text += `\nLicense Plate: ${licensePlate}\nState: ${state}`;
-  }
-  text += `\nCar Model: ${carModel}\nCar Year: ${carYear}\nEmail: ${email}\nPhone Number: ${phoneNumber}`;
-
-  const mailOptions = {
-    from: from,
-    to: process.env.EMAIL_TO,
-    subject: `Cash Offer Information - ${ownerName}`,
-    text: text
-  };
-
-  transporter.sendMail(mailOptions, (error, info) => {
-    if (error) {
-      return res.status(500).send(error.toString());
+app.post('/send-email', upload.fields([
+  { name: 'odometerPhoto', maxCount: 1 },
+  { name: 'driverFrontCornerPhoto', maxCount: 1 },
+  { name: 'passengerRearCornerPhoto', maxCount: 1 },
+]), async (req, res) => {
+  try {
+    const { ownerName, carModel, carYear, carMake, vin, email, phoneNumber, smokedIn, mechanicalIssues, odometerBroken, panelsNeedWork, rustOrHailDamage } = req.body;
+    const from = {
+      name: 'Cash Offer Customer',
+      address: emailUser
     }
-    res.status(200).send('Email sent: ' + info.response);
-  });
+    const text = `Owner Name: ${ownerName}\nVIN: ${vin}\nCar Make: ${carMake}\nCar Model: ${carModel}\nCar Year: ${carYear}\nEmail: ${email}\nPhone Number: ${phoneNumber}`;
+    const attachments = []
+
+    const compressedOdometerPhoto = await sharp(req.files.odometerPhoto[0].buffer).jpeg().toBuffer();
+    const compressedDriverFrontCornerPhoto = await sharp(req.files.driverFrontCornerPhoto[0].buffer).jpeg().toBuffer();
+    const compressedPassengerRearCornerPhoto = await sharp(req.files.passengerRearCornerPhoto[0].buffer).jpeg().toBuffer();
+
+    attachments.push({
+      filename: `Odometer Photo_${ownerName}.jpg`,
+      content: compressedOdometerPhoto
+    })
+    attachments.push({
+      filename: `Driver Front Corner Photo_${ownerName}.jpg`,
+      content: compressedDriverFrontCornerPhoto
+    })
+    attachments.push({
+      filename: `Passenger Rear Corner Photo_${ownerName}.jpg`,
+      content: compressedPassengerRearCornerPhoto
+    })
+
+    const mailOptions = {
+      from: from,
+      to: process.env.EMAIL_TO,
+      subject: `Cash Offer Information - ${ownerName}`,
+      text: text,
+      attachments: attachments
+    };
+
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        return res.status(500).send(error.toString());
+      }
+      res.status(200).send('Email sent: ' + info.response);
+    });
+  } catch (error) {
+    res.status(500).send(error.toString())
+  }
 });
 
 const PORT = process.env.PORT || 5000;
