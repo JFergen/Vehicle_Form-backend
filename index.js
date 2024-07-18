@@ -34,17 +34,32 @@ app.post('/send-email', upload.fields([
   { name: 'passengerRearCornerPhoto', maxCount: 1 },
 ]), async (req, res) => {
   try {
-    const { ownerName, carModel, carYear, carMake, vin, email, phoneNumber, smokedIn, mechanicalIssues, odometerBroken, panelsNeedWork, rustOrHailDamage } = req.body;
+    const { ownerName, carModel, carYear, carMake, vin, email, phoneNumber, smokedIn_question, smokedIn_answer, mechanicalIssues_question, mechanicalIssues_answer, odometerBroken_question, odometerBroken_answer, panelsNeedWork_question, panelsNeedWork_answer, rustOrHailDamage_question, rustOrHailDamage_answer } = req.body;
     const from = {
       name: 'Cash Offer Customer',
       address: emailUser
     }
-    const text = `Owner Name: ${ownerName}\nVIN: ${vin}\nCar Make: ${carMake}\nCar Model: ${carModel}\nCar Year: ${carYear}\nEmail: ${email}\nPhone Number: ${phoneNumber}`;
-    const attachments = []
+    const text = `
+      Owner & Vehicle Information:
+      Owner Name: ${ownerName}
+      VIN: ${vin}
+      Car Make: ${carMake}
+      Car Model: ${carModel}
+      Car Year: ${carYear}
+      Email: ${email}
+      Phone Number: ${phoneNumber}
 
+      Questions and Answers:
+      1. ${smokedIn_question}: ${smokedIn_answer}
+      2. ${mechanicalIssues_question}: ${mechanicalIssues_answer}
+      3. ${odometerBroken_question}: ${odometerBroken_answer}
+      4. ${panelsNeedWork_question}: ${panelsNeedWork_answer}
+      5. ${rustOrHailDamage_question}: ${rustOrHailDamage_answer}
+    `;
     const compressedOdometerPhoto = await sharp(req.files.odometerPhoto[0].buffer).jpeg().toBuffer();
-    const compressedDriverFrontCornerPhoto = await sharp(req.files.driverFrontCornerPhoto[0].buffer).jpeg().toBuffer();
-    const compressedPassengerRearCornerPhoto = await sharp(req.files.passengerRearCornerPhoto[0].buffer).jpeg().toBuffer();
+    const compressedDriverFrontCornerPhoto = await sharp(req.files.driverFrontCornerPhoto[0].buffer).resize(800).jpeg().toBuffer();
+    const compressedPassengerRearCornerPhoto = await sharp(req.files.passengerRearCornerPhoto[0].buffer).resize(800).jpeg().toBuffer();
+    const attachments = []
 
     attachments.push({
       filename: `Odometer Photo_${ownerName}.jpg`,
