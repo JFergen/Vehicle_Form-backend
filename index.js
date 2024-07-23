@@ -30,6 +30,9 @@ const transporter = nodemailer.createTransport({
 
 app.post('/send-email', upload.fields([
   { name: 'odometerPhoto', maxCount: 1 },
+  { name: 'dashboardPhoto', maxCount: 1 },
+  { name: 'frontSeatsPhoto', maxCount: 1 },
+  { name: 'interiorRoofPhoto', maxCount: 1 },
   { name: 'driverFrontCornerPhoto', maxCount: 1 },
   { name: 'passengerRearCornerPhoto', maxCount: 1 },
 ]), async (req, res) => {
@@ -56,23 +59,23 @@ app.post('/send-email', upload.fields([
       4. ${panelsNeedWork_question}: ${panelsNeedWork_answer}
       5. ${rustOrHailDamage_question}: ${rustOrHailDamage_answer}
     `;
-    const compressedOdometerPhoto = await sharp(req.files.odometerPhoto[0].buffer).jpeg().toBuffer();
-    const compressedDriverFrontCornerPhoto = await sharp(req.files.driverFrontCornerPhoto[0].buffer).resize(800).jpeg().toBuffer();
-    const compressedPassengerRearCornerPhoto = await sharp(req.files.passengerRearCornerPhoto[0].buffer).resize(800).jpeg().toBuffer();
-    const attachments = []
 
-    attachments.push({
-      filename: `Odometer Photo_${ownerName}.jpg`,
-      content: compressedOdometerPhoto
-    })
-    attachments.push({
-      filename: `Driver Front Corner Photo_${ownerName}.jpg`,
-      content: compressedDriverFrontCornerPhoto
-    })
-    attachments.push({
-      filename: `Passenger Rear Corner Photo_${ownerName}.jpg`,
-      content: compressedPassengerRearCornerPhoto
-    })
+    const photoNames = [
+      'odometerPhoto', 'dashboardPhoto', 'frontSeatsPhoto',
+      'interiorRoofPhoto', 'driverFrontCornerPhoto', 'passengerRearCornerPhoto'
+    ];
+
+    const compressPhoto = async (photo, resize = false) => {
+      let image = sharp(photo.buffer).jpeg();
+      if (resize) image = image.resize(800);
+      return await image.toBuffer();
+    };
+
+    const attachments = await Promise.all(photoNames.map(async (name, index) => {
+      const photo = req.files[name][0];
+      const compressedPhoto = await compressPhoto(photo, true);
+      return { filename: `${name}_${ownerName}.jpg`, content: compressedPhoto };
+    }));
 
     const mailOptions = {
       from: from,
